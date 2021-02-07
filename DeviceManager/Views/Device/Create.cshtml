@@ -1,0 +1,231 @@
+﻿@model DeviceManager.Shared.Models.Device
+
+@{
+    ViewData["Title"] = "Add a device";
+}
+
+<h1>Add a device</h1>
+
+<h4>Enter details</h4>
+<hr />
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { @id = "frmAddDevice" }))
+{
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label asp-for="location" class="control-label"></label>
+                            <input id="txtLocation" asp-for="location" class="form-control" />
+                            <span asp-validation-for="location" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label asp-for="type" class="control-label"></label>
+                            <input id="txtType" asp-for="type" class="form-control" />
+                            <span asp-validation-for="type" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label asp-for="device_health" class="control-label"></label>
+                            <input id="txtHealth" asp-for="device_health" class="form-control" />
+                            <span asp-validation-for="device_health" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label asp-for="last_used" class="control-label"></label>
+                            <input id="txtLastUsed" asp-for="last_used" class="form-control" />
+                            <span asp-validation-for="last_used" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label asp-for="price" class="control-label"></label>
+                            <input id="txtPrice" asp-for="price" class="form-control" />
+                            <span asp-validation-for="price" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label asp-for="color" class="control-label"></label>
+                            <input id="txtColor" asp-for="color" class="form-control" />
+                            <span asp-validation-for="color" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="button" id="btnAdd" class="btn btn-primary">Add Device</button>
+                    <div id="divSpinner" style="display:none" class="spinner-border text-primary" role="status">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+<div id="divSuccess" style="display:none" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Success</h5>
+            </div>
+            <div class="modal-body">
+                <p>The device has been added successfully!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnCloseSuccess" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divError" style="display:none" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Error</h5>
+            </div>
+            <div class="modal-body">
+                <p>An unexpected error occured!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnCloseError" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divMessage" style="display:none" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Error</h5>
+            </div>
+            <div id="divMessageModalBody" class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnCloseMessageModal" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript" language="javascript">
+        $(document).ready(function () {
+
+            $("#btnAdd").on('click', function (e) {
+                e.preventDefault();
+
+                var inputIsOkay = true;
+                var errorMsg = "";
+
+                if ($("#txtLocation").val().length == 0) {
+                     inputIsOkay = false;
+                     errorMsg = "Please enter a location.<br/>";
+                }
+
+                if ($("#txtType").val().length == 0) {
+                    inputIsOkay = false;
+                    errorMsg += "Please enter a type.<br/>";
+                }
+
+                if ($("#txtHealth").val().length == 0) {
+                    inputIsOkay = false;
+                    errorMsg += "Please enter a device health.<br/>";
+                }
+
+                if ($("#txtLastUsed").val().length == 0) {
+                    inputIsOkay = false;
+                    errorMsg += "Please enter a last used date.<br/>";
+                }
+
+                if ($("#txtPrice").val().length == 0 || $.isNumeric($("#txtPrice").val()) === false) {
+                    inputIsOkay = false;
+                    errorMsg += "Please enter a price.<br/>";
+                }
+
+                if ($("#txtColor").val().length == 0) {
+                    inputIsOkay = false;
+                    errorMsg += "Please enter a value for color.";
+                }
+                
+
+                if (inputIsOkay === true) {
+                    $("#btnAdd").hide();
+                    $("#divSpinner").show();
+
+                    var frmAddDevice = $("#frmAddDevice").serialize();
+                    $.ajax({
+                        url: '@Url.Action("Create", "Device")',
+                        type: 'POST',
+                        traditional: true,
+                        data: frmAddDevice,
+                        dataType: 'json',
+                        ContentType: "application/json;utf-8",
+                        cache: false,
+                        success: function (response) {
+                            $("#btnAdd").show();
+                            $("#divSpinner").hide();
+
+                            if (response === true) {
+                                $("#divSuccess").show();
+                            }
+                            else {
+                                $("#divError").show();
+                            }
+                        },
+                        error: function (response) {
+                            $("#btnAdd").show();
+                            $("#divSpinner").hide();
+                            $("#divError").show();
+                        }
+                    });
+                }
+                else {
+                    $('#divMessageModalBody').html(errorMsg);
+                    $("#divMessage").show();
+                }
+            });
+
+            $("#btnCloseSuccess").on('click', function (e) {
+                e.preventDefault();
+                window.location.href = '/Device/Index';
+                return false;
+            });
+
+            $("#btnCloseError").on('click', function (e) {
+                e.preventDefault();
+                $("#divError").hide();
+                return false;
+            });
+
+            $("#btnCloseMessageModal").on('click', function (e) {
+                e.preventDefault();
+                $("#divMessage").hide();
+                return false;
+            });
+        });
+    </script>
+}

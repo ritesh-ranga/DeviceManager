@@ -1,0 +1,189 @@
+﻿@model IEnumerable<DeviceManager.Shared.Models.Device>
+
+@{
+    ViewData["Title"] = "All Devices";
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#AddButton').click(function () {
+                window.location.href = '/Device/Create';
+                return false;
+            });
+
+            $("#btnModalNo").on('click', function (e) {
+                e.preventDefault();
+                $("#divConfirm").hide();
+                return false;
+            });
+
+            $("#btnModalYes").on('click', function (e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: '@Url.Action("Delete", "Device")',
+                    data: { 'id': deviceToDeleteID },
+                    type: 'DELETE',
+                    cache: false,
+                    success: function (response) {
+                        $("#divConfirm").hide();
+                        if (response === true) {
+                            $("#divSuccess").show();
+                        }
+                        else {
+                            $("#divError").show();
+                        }
+                    },
+                    error: function (response) {
+                        console.log(response);
+                        $("#divConfirm").hide();
+                        $("#divError").show();
+                    }
+                });
+            });
+
+            $("#btnCloseSuccess").on('click', function (e) {
+                e.preventDefault();
+                window.location.href = '/Device/Index';
+                return false;
+            });
+
+            $("#btnCloseError").on('click', function (e) {
+                e.preventDefault();
+                $("#divError").hide();
+                return false;
+            });
+        });
+
+        function btnEdit_click(id) {
+            window.location.href = '/Device/Edit/' + id;
+        }
+
+        var deviceToDeleteID = 0;
+
+        function btnDelete_click(id) {
+            deviceToDeleteID = id;
+            $("#divConfirm").show();
+        }
+
+    </script>
+}
+
+<h1>All Devices</h1>
+
+<p>
+    <button type="button" class="btn btn-outline-primary btn-sm" id="AddButton">Add a new device</button>
+</p>
+<table class="table table-striped table-hover table-sm">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.type)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.device_health)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.last_used)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.color)
+            </th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <th scope="row">
+                    @Html.DisplayFor(modelItem => item.id)
+                </th>
+                <td>
+                    @Html.DisplayFor(modelItem => item.location)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.type)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.device_health)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.last_used)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.price)
+                </td>
+                <td>
+                    <div style="background-color:@item.color;">&nbsp;</div>
+                </td>
+                <td>
+                    @*@Html.ActionLink("Edit", "Edit", new { id = item.ID }) |
+                        @Html.ActionLink("Delete", "Delete", new { id = item.ID })*@
+                    &nbsp;<button id="EditButton" type="button" class="btn btn-outline-primary btn-sm" onclick="btnEdit_click('@item.id');">Edit</button>
+                    &nbsp;<button id="DeleteButton" type="button" class="btn btn-outline-danger btn-sm" onclick="btnDelete_click('@item.id');">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div id="divConfirm" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Device</h5>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="btnModalNo" type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <button id="btnModalYes" type="button" class="btn btn-primary">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divSuccess" style="display:none" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Success</h5>
+            </div>
+            <div class="modal-body">
+                <p>The device has been deleted successfully!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnCloseSuccess" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divError" style="display:none" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Error</h5>
+            </div>
+            <div class="modal-body">
+                <p>An unexpected error occured!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnCloseError" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
